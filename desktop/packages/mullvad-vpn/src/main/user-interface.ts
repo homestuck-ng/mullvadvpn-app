@@ -148,6 +148,7 @@ export default class UserInterface implements WindowControllerDelegate {
   public createTrayIconController(tunnelState: TunnelState, monochromaticIcon: boolean) {
     const iconType = this.trayIconType(tunnelState);
     this.trayIconController = new TrayIconController(this.tray, iconType, monochromaticIcon, false);
+    this.trayIconController.setCountryCode(this.exitCountryCode(tunnelState));
   }
 
   public async initializeWindow(isLoggedIn: boolean, tunnelState: TunnelState) {
@@ -251,6 +252,7 @@ export default class UserInterface implements WindowControllerDelegate {
 
   public updateTrayIcon(tunnelState: TunnelState) {
     const type = this.trayIconType(tunnelState);
+    this.trayIconController?.setCountryCode(this.exitCountryCode(tunnelState));
     this.trayIconController?.animateToIcon(type);
   }
 
@@ -270,6 +272,14 @@ export default class UserInterface implements WindowControllerDelegate {
     this.windowController.close();
     this.trayIconController?.dispose();
   };
+
+  private exitCountryCode(tunnelState: TunnelState): string | undefined {
+    if (tunnelState.state !== 'connected') {
+      return undefined;
+    }
+
+    return tunnelState.details.location?.countryCode;
+  }
 
   private createWindow(): BrowserWindow {
     const unpinnedWindow = this.delegate.isUnpinnedWindow();

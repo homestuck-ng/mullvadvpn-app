@@ -21,6 +21,7 @@ import {
   IAppVersionInfo,
   ICustomList,
   IDevice,
+  IDeviceCleanupSettings,
   IDeviceRemoval,
   IDnsOptions,
   ILocation,
@@ -418,6 +419,10 @@ export default class AppRenderer {
   public updateAccountData = () => IpcRendererEventChannel.account.updateData();
   public removeDevice = (device: IDeviceRemoval) =>
     IpcRendererEventChannel.account.removeDevice(device);
+  public getDeviceCleanupSettings = () =>
+    IpcRendererEventChannel.account.getDeviceCleanupSettings();
+  public setDeviceCleanupSettings = (settings: IDeviceCleanupSettings) =>
+    IpcRendererEventChannel.account.setDeviceCleanupSettings(settings);
   public connectTunnel = () => IpcRendererEventChannel.tunnel.connect();
   public disconnectTunnel = (source: DisconnectSource) =>
     IpcRendererEventChannel.tunnel.disconnect(source);

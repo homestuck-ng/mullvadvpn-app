@@ -19,6 +19,7 @@ import {
   IAppVersionInfo,
   ICustomList,
   IDevice,
+  IDeviceCleanupSettings,
   IDeviceRemoval,
   IDnsOptions,
   IRelayListWithEndpointData,
@@ -506,6 +507,30 @@ export class DaemonRpc extends GrpcClient<ManagementServiceClient> {
     grpcDeviceRemoval.setDeviceId(deviceRemoval.deviceId);
 
     await this.call<grpcTypes.DeviceRemoval, Empty>(this.client.removeDevice, grpcDeviceRemoval);
+  }
+
+  public async getDeviceCleanupSettings(): Promise<IDeviceCleanupSettings> {
+    const response = await this.callEmpty<grpcTypes.DeviceCleanupSettings>(
+      this.client.getDeviceCleanupSettings,
+    );
+
+    return {
+      enabled: response.getEnabled(),
+      intervalSecs: response.getIntervalSecs(),
+      excludedDeviceIds: response.getExcludedDeviceIdsList(),
+    };
+  }
+
+  public async setDeviceCleanupSettings(settings: IDeviceCleanupSettings): Promise<void> {
+    const grpcSettings = new grpcTypes.DeviceCleanupSettings();
+    grpcSettings.setEnabled(settings.enabled);
+    grpcSettings.setIntervalSecs(settings.intervalSecs);
+    grpcSettings.setExcludedDeviceIdsList(settings.excludedDeviceIds);
+
+    await this.call<grpcTypes.DeviceCleanupSettings, Empty>(
+      this.client.setDeviceCleanupSettings,
+      grpcSettings,
+    );
   }
 
   public async createCustomList(newCustomList: NewCustomList): Promise<void | CustomListError> {

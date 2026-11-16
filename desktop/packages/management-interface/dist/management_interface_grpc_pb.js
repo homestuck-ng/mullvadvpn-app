@@ -228,6 +228,17 @@ function deserialize_mullvad_daemon_management_interface_DaitaSettings(buffer_ar
   return management_interface_pb.DaitaSettings.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
+function serialize_mullvad_daemon_management_interface_DeviceCleanupSettings(arg) {
+  if (!(arg instanceof management_interface_pb.DeviceCleanupSettings)) {
+    throw new Error('Expected argument of type mullvad_daemon.management_interface.DeviceCleanupSettings');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_mullvad_daemon_management_interface_DeviceCleanupSettings(buffer_arg) {
+  return management_interface_pb.DeviceCleanupSettings.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 function serialize_mullvad_daemon_management_interface_DeviceList(arg) {
   if (!(arg instanceof management_interface_pb.DeviceList)) {
     throw new Error('Expected argument of type mullvad_daemon.management_interface.DeviceList');
@@ -1044,6 +1055,29 @@ getDevice: {
     responseType: google_protobuf_empty_pb.Empty,
     requestSerialize: serialize_mullvad_daemon_management_interface_DeviceRemoval,
     requestDeserialize: deserialize_mullvad_daemon_management_interface_DeviceRemoval,
+    responseSerialize: serialize_google_protobuf_Empty,
+    responseDeserialize: deserialize_google_protobuf_Empty,
+  },
+  // Automatic removal of other devices
+getDeviceCleanupSettings: {
+    path: '/mullvad_daemon.management_interface.ManagementService/GetDeviceCleanupSettings',
+    requestStream: false,
+    responseStream: false,
+    requestType: google_protobuf_empty_pb.Empty,
+    responseType: management_interface_pb.DeviceCleanupSettings,
+    requestSerialize: serialize_google_protobuf_Empty,
+    requestDeserialize: deserialize_google_protobuf_Empty,
+    responseSerialize: serialize_mullvad_daemon_management_interface_DeviceCleanupSettings,
+    responseDeserialize: deserialize_mullvad_daemon_management_interface_DeviceCleanupSettings,
+  },
+  setDeviceCleanupSettings: {
+    path: '/mullvad_daemon.management_interface.ManagementService/SetDeviceCleanupSettings',
+    requestStream: false,
+    responseStream: false,
+    requestType: management_interface_pb.DeviceCleanupSettings,
+    responseType: google_protobuf_empty_pb.Empty,
+    requestSerialize: serialize_mullvad_daemon_management_interface_DeviceCleanupSettings,
+    requestDeserialize: deserialize_mullvad_daemon_management_interface_DeviceCleanupSettings,
     responseSerialize: serialize_google_protobuf_Empty,
     responseDeserialize: deserialize_google_protobuf_Empty,
   },

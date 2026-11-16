@@ -2,6 +2,7 @@ use crate::{
     access_method,
     constraints::Constraint,
     custom_list::CustomListsSettings,
+    device::DeviceId,
     relay_constraints::{
         GeographicLocationConstraint, LocationConstraint, ObfuscationSettings, RelayConstraints,
         RelayOverride, RelaySettings, RelaySettingsFormatter, SelectedObfuscation,
@@ -12,6 +13,7 @@ use crate::{
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 #[cfg(any(windows, target_os = "android", target_os = "macos"))]
 use std::collections::HashSet;
+use std::time::Duration;
 use talpid_types::net::GenericTunnelOptions;
 
 mod dns;
@@ -138,6 +140,8 @@ pub struct Settings {
     /// Split tunneling settings
     #[cfg(any(windows, target_os = "android", target_os = "macos"))]
     pub split_tunnel: SplitTunnelSettings,
+    /// Automatic removal of other devices logged in to the same account.
+    pub device_cleanup: DeviceCleanupSettings,
     /// Specifies settings schema version
     pub settings_version: SettingsVersion,
     /// Stores the user's recently connected locations. If None recents have been disabled by the user.
@@ -273,6 +277,7 @@ impl Default for Settings {
             show_beta_releases: false,
             #[cfg(any(windows, target_os = "android", target_os = "macos"))]
             split_tunnel: SplitTunnelSettings::default(),
+            device_cleanup: DeviceCleanupSettings::default(),
             settings_version: CURRENT_SETTINGS_VERSION,
             recents: Some(Recents::default()),
             #[cfg(feature = "custom-vpn")]
@@ -370,6 +375,38 @@ impl Settings {
         recents.exits.retain(|r| *r != exit_location);
         recents.exits.insert(0, exit_location);
         recents.exits.truncate(Self::RECENTS_MAX_COUNT);
+    }
+}
+
+/// Settings for automatically removing (deauthorizing) other devices that are logged in to the
+/// same account as the current device.
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(default)]
+pub struct DeviceCleanupSettings {
+    /// Whether other devices should be removed automatically.
+    pub enabled: bool,
+    /// Cooldown between account device-list checks used to kick unauthorized devices.
+    pub interval: Duration,
+    /// IDs of devices that must never be removed automatically.
+    pub excluded_devices: Vec<DeviceId>,
+}
+
+/// Default kick cooldown for automatic device cleanup.
+pub const DEVICE_CLEANUP_DEFAULT_INTERVAL: Duration = Duration::from_secs(1);
+
+/// Smallest allowed kick cooldown for automatic device cleanup.
+pub const DEVICE_CLEANUP_MIN_INTERVAL: Duration = Duration::from_secs(1);
+
+/// Largest allowed kick cooldown for automatic device cleanup.
+pub const DEVICE_CLEANUP_MAX_INTERVAL: Duration = Duration::from_secs(3600);
+
+impl Default for DeviceCleanupSettings {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            interval: DEVICE_CLEANUP_DEFAULT_INTERVAL,
+            excluded_devices: Vec::new(),
+        }
     }
 }
 

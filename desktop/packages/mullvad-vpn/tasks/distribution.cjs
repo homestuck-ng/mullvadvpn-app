@@ -39,7 +39,8 @@ function newConfig() {
 
     directories: {
       buildResources: root('dist-assets'),
-      output: root('dist'),
+      // Override with MULLVAD_DIST_OUT to pack beside a locked dist/win-unpacked.
+      output: root(process.env.MULLVAD_DIST_OUT || 'dist'),
     },
 
     extraMetadata: {

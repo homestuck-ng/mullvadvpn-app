@@ -57,6 +57,8 @@ interface IManagementServiceService extends grpc.ServiceDefinition<grpc.UntypedS
     updateDevice: IManagementServiceService_IUpdateDevice;
     listDevices: IManagementServiceService_IListDevices;
     removeDevice: IManagementServiceService_IRemoveDevice;
+    getDeviceCleanupSettings: IManagementServiceService_IGetDeviceCleanupSettings;
+    setDeviceCleanupSettings: IManagementServiceService_ISetDeviceCleanupSettings;
     setWireguardRotationInterval: IManagementServiceService_ISetWireguardRotationInterval;
     resetWireguardRotationInterval: IManagementServiceService_IResetWireguardRotationInterval;
     rotateWireguardKey: IManagementServiceService_IRotateWireguardKey;
@@ -514,6 +516,24 @@ interface IManagementServiceService_IRemoveDevice extends grpc.MethodDefinition<
     responseStream: false;
     requestSerialize: grpc.serialize<management_interface_pb.DeviceRemoval>;
     requestDeserialize: grpc.deserialize<management_interface_pb.DeviceRemoval>;
+    responseSerialize: grpc.serialize<google_protobuf_empty_pb.Empty>;
+    responseDeserialize: grpc.deserialize<google_protobuf_empty_pb.Empty>;
+}
+interface IManagementServiceService_IGetDeviceCleanupSettings extends grpc.MethodDefinition<google_protobuf_empty_pb.Empty, management_interface_pb.DeviceCleanupSettings> {
+    path: "/mullvad_daemon.management_interface.ManagementService/GetDeviceCleanupSettings";
+    requestStream: false;
+    responseStream: false;
+    requestSerialize: grpc.serialize<google_protobuf_empty_pb.Empty>;
+    requestDeserialize: grpc.deserialize<google_protobuf_empty_pb.Empty>;
+    responseSerialize: grpc.serialize<management_interface_pb.DeviceCleanupSettings>;
+    responseDeserialize: grpc.deserialize<management_interface_pb.DeviceCleanupSettings>;
+}
+interface IManagementServiceService_ISetDeviceCleanupSettings extends grpc.MethodDefinition<management_interface_pb.DeviceCleanupSettings, google_protobuf_empty_pb.Empty> {
+    path: "/mullvad_daemon.management_interface.ManagementService/SetDeviceCleanupSettings";
+    requestStream: false;
+    responseStream: false;
+    requestSerialize: grpc.serialize<management_interface_pb.DeviceCleanupSettings>;
+    requestDeserialize: grpc.deserialize<management_interface_pb.DeviceCleanupSettings>;
     responseSerialize: grpc.serialize<google_protobuf_empty_pb.Empty>;
     responseDeserialize: grpc.deserialize<google_protobuf_empty_pb.Empty>;
 }
@@ -1043,6 +1063,8 @@ export interface IManagementServiceServer extends grpc.UntypedServiceImplementat
     updateDevice: grpc.handleUnaryCall<google_protobuf_empty_pb.Empty, google_protobuf_empty_pb.Empty>;
     listDevices: grpc.handleUnaryCall<google_protobuf_wrappers_pb.StringValue, management_interface_pb.DeviceList>;
     removeDevice: grpc.handleUnaryCall<management_interface_pb.DeviceRemoval, google_protobuf_empty_pb.Empty>;
+    getDeviceCleanupSettings: grpc.handleUnaryCall<google_protobuf_empty_pb.Empty, management_interface_pb.DeviceCleanupSettings>;
+    setDeviceCleanupSettings: grpc.handleUnaryCall<management_interface_pb.DeviceCleanupSettings, google_protobuf_empty_pb.Empty>;
     setWireguardRotationInterval: grpc.handleUnaryCall<google_protobuf_duration_pb.Duration, google_protobuf_empty_pb.Empty>;
     resetWireguardRotationInterval: grpc.handleUnaryCall<google_protobuf_empty_pb.Empty, google_protobuf_empty_pb.Empty>;
     rotateWireguardKey: grpc.handleUnaryCall<google_protobuf_empty_pb.Empty, google_protobuf_empty_pb.Empty>;
@@ -1233,6 +1255,12 @@ export interface IManagementServiceClient {
     removeDevice(request: management_interface_pb.DeviceRemoval, callback: (error: grpc.ServiceError | null, response: google_protobuf_empty_pb.Empty) => void): grpc.ClientUnaryCall;
     removeDevice(request: management_interface_pb.DeviceRemoval, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: google_protobuf_empty_pb.Empty) => void): grpc.ClientUnaryCall;
     removeDevice(request: management_interface_pb.DeviceRemoval, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: google_protobuf_empty_pb.Empty) => void): grpc.ClientUnaryCall;
+    getDeviceCleanupSettings(request: google_protobuf_empty_pb.Empty, callback: (error: grpc.ServiceError | null, response: management_interface_pb.DeviceCleanupSettings) => void): grpc.ClientUnaryCall;
+    getDeviceCleanupSettings(request: google_protobuf_empty_pb.Empty, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: management_interface_pb.DeviceCleanupSettings) => void): grpc.ClientUnaryCall;
+    getDeviceCleanupSettings(request: google_protobuf_empty_pb.Empty, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: management_interface_pb.DeviceCleanupSettings) => void): grpc.ClientUnaryCall;
+    setDeviceCleanupSettings(request: management_interface_pb.DeviceCleanupSettings, callback: (error: grpc.ServiceError | null, response: google_protobuf_empty_pb.Empty) => void): grpc.ClientUnaryCall;
+    setDeviceCleanupSettings(request: management_interface_pb.DeviceCleanupSettings, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: google_protobuf_empty_pb.Empty) => void): grpc.ClientUnaryCall;
+    setDeviceCleanupSettings(request: management_interface_pb.DeviceCleanupSettings, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: google_protobuf_empty_pb.Empty) => void): grpc.ClientUnaryCall;
     setWireguardRotationInterval(request: google_protobuf_duration_pb.Duration, callback: (error: grpc.ServiceError | null, response: google_protobuf_empty_pb.Empty) => void): grpc.ClientUnaryCall;
     setWireguardRotationInterval(request: google_protobuf_duration_pb.Duration, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: google_protobuf_empty_pb.Empty) => void): grpc.ClientUnaryCall;
     setWireguardRotationInterval(request: google_protobuf_duration_pb.Duration, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: google_protobuf_empty_pb.Empty) => void): grpc.ClientUnaryCall;
@@ -1527,6 +1555,12 @@ export class ManagementServiceClient extends grpc.Client implements IManagementS
     public removeDevice(request: management_interface_pb.DeviceRemoval, callback: (error: grpc.ServiceError | null, response: google_protobuf_empty_pb.Empty) => void): grpc.ClientUnaryCall;
     public removeDevice(request: management_interface_pb.DeviceRemoval, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: google_protobuf_empty_pb.Empty) => void): grpc.ClientUnaryCall;
     public removeDevice(request: management_interface_pb.DeviceRemoval, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: google_protobuf_empty_pb.Empty) => void): grpc.ClientUnaryCall;
+    public getDeviceCleanupSettings(request: google_protobuf_empty_pb.Empty, callback: (error: grpc.ServiceError | null, response: management_interface_pb.DeviceCleanupSettings) => void): grpc.ClientUnaryCall;
+    public getDeviceCleanupSettings(request: google_protobuf_empty_pb.Empty, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: management_interface_pb.DeviceCleanupSettings) => void): grpc.ClientUnaryCall;
+    public getDeviceCleanupSettings(request: google_protobuf_empty_pb.Empty, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: management_interface_pb.DeviceCleanupSettings) => void): grpc.ClientUnaryCall;
+    public setDeviceCleanupSettings(request: management_interface_pb.DeviceCleanupSettings, callback: (error: grpc.ServiceError | null, response: google_protobuf_empty_pb.Empty) => void): grpc.ClientUnaryCall;
+    public setDeviceCleanupSettings(request: management_interface_pb.DeviceCleanupSettings, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: google_protobuf_empty_pb.Empty) => void): grpc.ClientUnaryCall;
+    public setDeviceCleanupSettings(request: management_interface_pb.DeviceCleanupSettings, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: google_protobuf_empty_pb.Empty) => void): grpc.ClientUnaryCall;
     public setWireguardRotationInterval(request: google_protobuf_duration_pb.Duration, callback: (error: grpc.ServiceError | null, response: google_protobuf_empty_pb.Empty) => void): grpc.ClientUnaryCall;
     public setWireguardRotationInterval(request: google_protobuf_duration_pb.Duration, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: google_protobuf_empty_pb.Empty) => void): grpc.ClientUnaryCall;
     public setWireguardRotationInterval(request: google_protobuf_duration_pb.Duration, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: google_protobuf_empty_pb.Empty) => void): grpc.ClientUnaryCall;

@@ -5,6 +5,7 @@ import {
   DeviceEvent,
   DeviceState,
   IAccountData,
+  IDeviceCleanupSettings,
   IDeviceRemoval,
   LogoutSource,
   TunnelState,
@@ -99,6 +100,14 @@ export default class Account {
     IpcMainEventChannel.account.handleRemoveDevice((deviceRemoval: IDeviceRemoval) => {
       return this.daemonRpc.removeDevice(deviceRemoval);
     });
+    IpcMainEventChannel.account.handleGetDeviceCleanupSettings(() => {
+      return this.daemonRpc.getDeviceCleanupSettings();
+    });
+    IpcMainEventChannel.account.handleSetDeviceCleanupSettings(
+      (settings: IDeviceCleanupSettings) => {
+        return this.daemonRpc.setDeviceCleanupSettings(settings);
+      },
+    );
   }
 
   public isLoggedIn(): boolean {

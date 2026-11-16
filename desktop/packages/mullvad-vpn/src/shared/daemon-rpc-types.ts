@@ -28,6 +28,9 @@ export interface ILocation {
   ipv4?: string;
   ipv6?: string;
   country: string;
+  /// Country code of the location, e.g. "se". Only present when the location comes from a tunnel
+  /// state, `country` contains the country name.
+  countryCode?: string;
   city?: string;
   latitude: number;
   longitude: number;
@@ -444,6 +447,12 @@ export interface IDevice {
 export interface IDeviceRemoval {
   accountNumber: string;
   deviceId: string;
+}
+
+export interface IDeviceCleanupSettings {
+  enabled: boolean;
+  intervalSecs: number;
+  excludedDeviceIds: Array<string>;
 }
 
 export type CustomLists = Array<ICustomList>;

@@ -3,18 +3,26 @@ import { Text } from '../../../lib/components';
 import { FlexColumn } from '../../../lib/components/flex-column';
 import { View } from '../../../lib/components/view';
 import { useHistory } from '../../../lib/history';
+import { useSelector } from '../../../redux/store';
 import { AppNavigationHeader } from '../../app-navigation-header';
 import { DeviceList } from '../../device-list';
 import { BackAction } from '../../keyboard-navigation';
 import { NavigationContainer } from '../../NavigationContainer';
 import { NavigationScrollbars } from '../../NavigationScrollbars';
-import { DevicesState } from './components';
-import { useQueryDevices } from './hooks';
+import { DeviceCleanupPanel, DevicesState } from './components';
+import { useDeviceCleanupSettings, useQueryDevices } from './hooks';
 import { ManageDevicesProvider } from './ManageDevicesContext';
 
 export function ManageDevicesView() {
   const { pop } = useHistory();
   const { devices, isFetching, isLoading, refetch } = useQueryDevices();
+  const currentDeviceName = useSelector((state) => state.account.deviceName);
+  const {
+    settings: cleanupSettings,
+    setEnabled: setCleanupEnabled,
+    setIntervalSecs: setCleanupInterval,
+    setExcludedDeviceIds,
+  } = useDeviceCleanupSettings();
   const showDeviceList = devices && devices.length > 0;
 
   return (
@@ -49,6 +57,16 @@ export function ManageDevicesView() {
                       }
                     </Text>
                   </FlexColumn>
+                  {cleanupSettings && (
+                    <DeviceCleanupPanel
+                      settings={cleanupSettings}
+                      devices={devices ?? []}
+                      currentDeviceName={currentDeviceName}
+                      onEnabledChange={setCleanupEnabled}
+                      onIntervalChange={setCleanupInterval}
+                      onExcludedDeviceIdsChange={setExcludedDeviceIds}
+                    />
+                  )}
                   {showDeviceList ? <DeviceList devices={devices} /> : <DevicesState />}
                 </View.Container>
               </View.Content>

@@ -124,6 +124,17 @@ impl DeviceService {
         self.list_devices(account_number).await
     }
 
+    /// Remove a device without listing the account afterwards.
+    ///
+    /// Useful when several devices are removed in parallel and the caller will list once.
+    pub(crate) async fn remove_device_only(
+        &self,
+        account_number: AccountNumber,
+        device_id: DeviceId,
+    ) -> Result<(), Error> {
+        self.remove_device_inner(account_number, device_id).await
+    }
+
     async fn remove_device_inner(
         &self,
         number: AccountNumber,

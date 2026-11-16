@@ -21,6 +21,9 @@ export default class TrayIconController {
 
   private previousNotificationIconReason?: string;
 
+  private countryCode?: string;
+  private flagImages = new Map<string, NativeImage | null>();
+
   constructor(
     private tray: Tray,
     private iconTypeValue: TrayIconType,
@@ -85,6 +88,23 @@ export default class TrayIconController {
     animation.play({ end: frame });
   }
 
+  /// Sets the country code of the exit relay. When set while connected, the flag of that country is
+  /// shown in the tray instead of the lock icon.
+  public setCountryCode(countryCode?: string) {
+    const normalizedCountryCode = countryCode?.toLowerCase();
+    if (normalizedCountryCode === this.countryCode) {
+      return;
+    }
+
+    this.countryCode = normalizedCountryCode;
+
+    // The flag is only rendered on the current frame, so make sure an idle tray icon is updated
+    // right away instead of waiting for the next animation.
+    if (this.animation && !this.animation.isRunning) {
+      this.onFrame(this.animation.currentFrame);
+    }
+  }
+
   private async updateThemeImpl() {
     const systemUsesLightTheme = await this.getSystemUsesLightTheme();
     this.iconSet = this.loadImages(systemUsesLightTheme);
@@ -120,13 +140,38 @@ export default class TrayIconController {
   }
 
   private onFrame = (frameNumber: number) => {
-    const frame = this.iconSet[frameNumber];
+    const frame = this.flagImage() ?? this.iconSet[frameNumber];
     if (frame === undefined) {
       log.error('Failed to show tray icon due to the icon being undefined');
     } else {
       this.tray.setImage(frame);
     }
   };
+
+  /// Returns the flag of the connected exit relay, if it should and can be shown.
+  private flagImage(): NativeImage | undefined {
+    if (process.platform !== 'win32' || this.countryCode === undefined) {
+      return undefined;
+    }
+    if (this.iconTypeValue !== 'secured') {
+      return undefined;
+    }
+
+    const cachedImage = this.flagImages.get(this.countryCode);
+    if (cachedImage !== undefined) {
+      return cachedImage ?? undefined;
+    }
+
+    const image = new TrayIcon(this.countryCode, 'flags', 'png').toNativeImage();
+    if (image.isEmpty()) {
+      // Cache missing flags so that the file system is not queried on every frame.
+      this.flagImages.set(this.countryCode, null);
+      return undefined;
+    }
+
+    this.flagImages.set(this.countryCode, image);
+    return image;
+  }
 
   private loadImages(systemUsesLightTheme?: boolean): NativeImage[] {
     const notificationIcon = this.iconParameters.notification ? '_notification' : '';

@@ -173,6 +173,8 @@ impl TryFrom<proto::Settings> for mullvad_types::settings::Settings {
             // NOTE: This field is set based on mullvad-types. It's not based on the actual settings
             // version.
             settings_version: CURRENT_SETTINGS_VERSION,
+            // Device cleanup has its own RPC and is not part of the settings message.
+            device_cleanup: mullvad_types::settings::DeviceCleanupSettings::default(),
             custom_lists: mullvad_types::custom_list::CustomListsSettings::try_from(
                 custom_lists_settings,
             )?,

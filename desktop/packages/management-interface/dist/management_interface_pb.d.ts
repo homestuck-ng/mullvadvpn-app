@@ -3473,6 +3473,34 @@ export namespace DeviceState {
 
 }
 
+export class DeviceCleanupSettings extends jspb.Message { 
+    getEnabled(): boolean;
+    setEnabled(value: boolean): DeviceCleanupSettings;
+    getIntervalSecs(): number;
+    setIntervalSecs(value: number): DeviceCleanupSettings;
+    clearExcludedDeviceIdsList(): void;
+    getExcludedDeviceIdsList(): Array<string>;
+    setExcludedDeviceIdsList(value: Array<string>): DeviceCleanupSettings;
+    addExcludedDeviceIds(value: string, index?: number): string;
+
+    serializeBinary(): Uint8Array;
+    toObject(includeInstance?: boolean): DeviceCleanupSettings.AsObject;
+    static toObject(includeInstance: boolean, msg: DeviceCleanupSettings): DeviceCleanupSettings.AsObject;
+    static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+    static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+    static serializeBinaryToWriter(message: DeviceCleanupSettings, writer: jspb.BinaryWriter): void;
+    static deserializeBinary(bytes: Uint8Array): DeviceCleanupSettings;
+    static deserializeBinaryFromReader(message: DeviceCleanupSettings, reader: jspb.BinaryReader): DeviceCleanupSettings;
+}
+
+export namespace DeviceCleanupSettings {
+    export type AsObject = {
+        enabled: boolean,
+        intervalSecs: number,
+        excludedDeviceIdsList: Array<string>,
+    }
+}
+
 export class DeviceEvent extends jspb.Message { 
     getCause(): DeviceEvent.Cause;
     setCause(value: DeviceEvent.Cause): DeviceEvent;

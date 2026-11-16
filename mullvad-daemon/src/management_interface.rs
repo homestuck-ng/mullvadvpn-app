@@ -23,7 +23,7 @@ use mullvad_types::{
         ObfuscationSettings, RelayOverride, RelaySettings, allowed_ip::AllowedIps,
     },
     relay_list::RelayList,
-    settings::{DnsOptions, Settings, SettingsKeyList},
+    settings::{DeviceCleanupSettings, DnsOptions, Settings, SettingsKeyList},
     states::{TargetState, TunnelState},
     version,
     wireguard::{RotationInterval, RotationIntervalError},
@@ -563,6 +563,33 @@ impl ManagementService for ManagementServiceImpl {
             removal.device_id,
         ))?;
         self.wait_for_result(rx).await?.map_err(map_daemon_error)?;
+        Ok(Response::new(()))
+    }
+
+    async fn get_device_cleanup_settings(
+        &self,
+        _: Request<()>,
+    ) -> ServiceResult<types::DeviceCleanupSettings> {
+        log::debug!("get_device_cleanup_settings");
+        let (tx, rx) = oneshot::channel();
+        self.send_command_to_daemon(DaemonCommand::GetDeviceCleanupSettings(tx))?;
+        let settings = self.wait_for_result(rx).await?;
+        Ok(Response::new(types::DeviceCleanupSettings::from(&settings)))
+    }
+
+    async fn set_device_cleanup_settings(
+        &self,
+        request: Request<types::DeviceCleanupSettings>,
+    ) -> ServiceResult<()> {
+        log::debug!("set_device_cleanup_settings");
+        let cleanup_settings =
+            DeviceCleanupSettings::try_from(request.into_inner()).map_err(map_protobuf_type_err)?;
+        let (tx, rx) = oneshot::channel();
+        self.send_command_to_daemon(DaemonCommand::SetDeviceCleanupSettings(
+            tx,
+            cleanup_settings,
+        ))?;
+        self.wait_for_result(rx).await??;
         Ok(Response::new(()))
     }
 

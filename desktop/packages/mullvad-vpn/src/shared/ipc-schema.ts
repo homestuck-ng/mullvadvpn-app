@@ -17,6 +17,7 @@ import {
   IAppVersionInfo,
   ICustomList,
   IDevice,
+  IDeviceCleanupSettings,
   IDeviceRemoval,
   IDnsOptions,
   IRelayListWithEndpointData,
@@ -243,6 +244,8 @@ export const ipcSchema = {
     updateData: send<void>(),
     listDevices: invoke<AccountNumber, Array<IDevice>>(),
     removeDevice: invoke<IDeviceRemoval, void>(),
+    getDeviceCleanupSettings: invoke<void, IDeviceCleanupSettings>(),
+    setDeviceCleanupSettings: invoke<IDeviceCleanupSettings, void>(),
   },
   accountHistory: {
     '': notifyRenderer<AccountNumber | undefined>(),

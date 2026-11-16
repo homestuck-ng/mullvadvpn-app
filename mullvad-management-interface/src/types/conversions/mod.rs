@@ -7,6 +7,7 @@ mod custom_tunnel;
 #[cfg(feature = "custom-vpn")]
 mod custom_vpn;
 mod device;
+mod device_cleanup;
 mod features;
 mod location;
 mod logging;

@@ -10,6 +10,7 @@ mod api_address_updater;
 mod cleanup;
 mod custom_list;
 pub mod device;
+mod device_cleanup;
 mod dns;
 pub mod exception_logging;
 mod geoip;
@@ -70,7 +71,7 @@ use mullvad_types::{
         ObfuscationSettings, RelayOverride, RelaySettings, allowed_ip::AllowedIps,
     },
     relay_list::RelayList,
-    settings::{DnsOptions, Settings, SettingsKeyList},
+    settings::{DeviceCleanupSettings, DnsOptions, Settings, SettingsKeyList},
     states::{Secured, TargetState, TargetStateStrict, TunnelState},
     version::AppVersionInfo,
     wireguard::{PublicKey, QuantumResistantState, RotationInterval},
@@ -286,6 +287,10 @@ pub enum DaemonCommand {
     ListDevices(ResponseTx<Vec<Device>, Error>, AccountNumber),
     /// Remove device from a given account.
     RemoveDevice(ResponseTx<(), Error>, AccountNumber, DeviceId),
+    /// Return the automatic device cleanup settings.
+    GetDeviceCleanupSettings(oneshot::Sender<DeviceCleanupSettings>),
+    /// Update the automatic device cleanup settings.
+    SetDeviceCleanupSettings(ResponseTx<(), settings::Error>, DeviceCleanupSettings),
     /// Place constraints on the type of tunnel and relay
     SetRelaySettings(ResponseTx<(), settings::Error>, RelaySettings),
     /// Set the allow LAN setting.
@@ -1082,6 +1087,17 @@ impl Daemon {
             leak_checker
         };
 
+        let (device_cleanup_tx, device_cleanup_rx) =
+            tokio::sync::watch::channel(settings.settings().device_cleanup.clone());
+        settings.register_change_listener(move |settings| {
+            let _ = device_cleanup_tx.send(settings.device_cleanup.clone());
+        });
+        device_cleanup::spawn(
+            account_manager.clone(),
+            device_cleanup_rx,
+            management_interface.notifier().clone(),
+        );
+
         let daemon = Daemon {
             tunnel_state: TunnelState::Disconnected {
                 location: None,
@@ -1554,6 +1570,11 @@ impl Daemon {
             ListDevices(tx, account_number) => self.on_list_devices(tx, account_number),
             RemoveDevice(tx, account_number, device_id) => {
                 self.on_remove_device(tx, account_number, device_id)
+            }
+            GetDeviceCleanupSettings(tx) => self.on_get_device_cleanup_settings(tx),
+            SetDeviceCleanupSettings(tx, cleanup_settings) => {
+                self.on_set_device_cleanup_settings(tx, cleanup_settings)
+                    .await
             }
             GetAccountHistory(tx) => self.on_get_account_history(tx),
             ClearAccountHistory(tx) => self.on_clear_account_history(tx).await,
@@ -2198,6 +2219,27 @@ impl Daemon {
                 "remove_device response",
             );
         });
+    }
+
+    fn on_get_device_cleanup_settings(&self, tx: oneshot::Sender<DeviceCleanupSettings>) {
+        Self::oneshot_send(
+            tx,
+            self.settings.settings().device_cleanup.clone(),
+            "get_device_cleanup_settings response",
+        );
+    }
+
+    async fn on_set_device_cleanup_settings(
+        &mut self,
+        tx: ResponseTx<(), settings::Error>,
+        cleanup_settings: DeviceCleanupSettings,
+    ) {
+        let result = self
+            .settings
+            .update(move |settings| settings.device_cleanup = cleanup_settings)
+            .await
+            .map(|_| ());
+        Self::oneshot_send(tx, result, "set_device_cleanup_settings response");
     }
 
     fn on_get_account_history(&mut self, tx: oneshot::Sender<Option<AccountNumber>>) {

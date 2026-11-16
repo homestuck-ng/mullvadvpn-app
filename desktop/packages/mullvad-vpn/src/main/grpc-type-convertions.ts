@@ -354,6 +354,7 @@ function convertFromTunnelStateRelayInfo(
       },
       location: state.location && {
         ...state.location,
+        countryCode: state.location.location?.country,
         hostname: state.location.location?.hostname,
         entryHostname: state.location.entryLocation?.hostname,
       },

@@ -75,6 +75,10 @@ service ManagementService {
   rpc ListDevices(google.protobuf.StringValue) returns (DeviceList) {}
   rpc RemoveDevice(DeviceRemoval) returns (google.protobuf.Empty) {}
 
+  // Automatic removal of other devices
+  rpc GetDeviceCleanupSettings(google.protobuf.Empty) returns (DeviceCleanupSettings) {}
+  rpc SetDeviceCleanupSettings(DeviceCleanupSettings) returns (google.protobuf.Empty) {}
+
   // WireGuard key management
   rpc SetWireguardRotationInterval(google.protobuf.Duration) returns (google.protobuf.Empty) {}
   rpc ResetWireguardRotationInterval(google.protobuf.Empty) returns (google.protobuf.Empty) {}
@@ -935,6 +939,15 @@ message DeviceState {
   }
   State state = 1;
   AccountAndDevice device = 2;
+}
+
+message DeviceCleanupSettings {
+  // Whether other devices should be removed automatically.
+  bool enabled = 1;
+  // Kick cooldown in seconds between device-list checks. Valid range: 1-3600.
+  uint64 interval_secs = 2;
+  // IDs of devices that should never be removed automatically.
+  repeated string excluded_device_ids = 3;
 }
 
 message DeviceEvent {

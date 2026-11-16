@@ -2,7 +2,11 @@ import { nativeImage } from 'electron';
 import path from 'path';
 
 export class TrayIcon {
-  constructor(public fileName?: string) {}
+  constructor(
+    public fileName?: string,
+    private subdirectory?: string,
+    private extensionOverride?: string,
+  ) {}
 
   public get basePath() {
     const basePath = path.resolve(import.meta.dirname, 'assets/images/menubar-icons');
@@ -11,20 +15,18 @@ export class TrayIcon {
   }
 
   public get extension() {
-    const extension = process.platform === 'win32' ? 'ico' : 'png';
+    const extension = this.extensionOverride ?? (process.platform === 'win32' ? 'ico' : 'png');
 
     return extension;
   }
 
   public get filePath() {
     if (this.fileName) {
-      const filePath = path.join(
-        this.basePath,
-        process.platform,
-        `${this.fileName}.${this.extension}`,
-      );
+      const directory = this.subdirectory
+        ? path.join(this.basePath, process.platform, this.subdirectory)
+        : path.join(this.basePath, process.platform);
 
-      return filePath;
+      return path.join(directory, `${this.fileName}.${this.extension}`);
     }
 
     return null;
